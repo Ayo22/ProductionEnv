@@ -4,14 +4,34 @@
 #include "CarMoveComponent.h"
 
 // Sets default values for this component's properties
-UCarMoveComponent::UCarMoveComponent() :speed(0.0f), maxSpeed(20.0f), acceleration(4.0f), friction(0.0f), frictionMax(1.5f), torque(0.0f), hAccel(0.0f), vAccel(0.0f), currentVelocity(FVector::ZeroVector) {
+UCarMoveComponent::UCarMoveComponent()
+	: percision(1.0f)
+	, max_forward_speed(50.0f)
+	, max_backward_speed(17.0f)
+	, linear_acceleration(70.0f)
+	, linear_deceleration(48.0f)
+	, linear_rollout(25.0f)
+	, boost_multiplier(3.0f)
+	, traction(50.0f)
+	, max_angular_speed(1.0f)
+	, angular_acceleration(1.0f)
+	, angular_deceleration(1.0f)
+	, mass(2)
+	, linearVelocity(FVector::ZeroVector)
+	, angularVelocity(FVector::ZeroVector)
+	, input_moveAxis(FVector2D::ZeroVector)
+	, input_boost(false)
+	, input_drift(false) {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+
+	// server stuff
 	bReplicates = true;
 	// ...
-}
 
+
+}
 
 // Called when the game starts
 void UCarMoveComponent::BeginPlay() {
@@ -24,74 +44,140 @@ void UCarMoveComponent::BeginPlay() {
 // Called every frame
 void UCarMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	// ...
 
+	// update the car physics
+	UpdateCarDynamics(DeltaTime);
 }
 
-void UCarMoveComponent::UpdateCarDynamics_Implementation() {
+bool UCarMoveComponent::UpdateCarDynamics_Validate(float delta) { return true; }
+void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
+	// constant
+	const float perc = percision * delta;
 
-	if (FMath::Abs(vAccel) > 0.0f) //Accelerating
-	{
-		if (friction < frictionMax) {
-			friction += 0.03f;
+	// do linear movement
+	if (input_moveAxis.Y != 0) {
+		const float scalar = FMath::Abs(linearVelocity.X);
+
+		if (input_moveAxis.Y > 0) { // move forward
+			// constants
+			const float max_spd = max_forward_speed * (input_boost ? boost_multiplier : 1.0f);
+			const float linear_accel = linear_acceleration * (input_boost ? boost_multiplier : 1.0f);
+
+			if (FMath::IsNearlyEqual(linearVelocity.X, max_spd, perc))		linearVelocity.X = max_spd;
+			else if (linearVelocity.X > max_spd)							linearVelocity.X -= linear_deceleration * delta;
+			else if (linearVelocity.X < max_spd)							linearVelocity.X += linear_accel * delta;
+
 		}
+		if (input_moveAxis.Y < 0) { // move backward
+			// constants
+			const float max_spd = max_backward_speed * (input_boost ? boost_multiplier : 1.0f);
+			const float linear_accel = linear_acceleration * (input_boost ? boost_multiplier : 1.0f);
 
-		if (vAccel > 0.0f) {
-			if (currentVelocity.Y < maxSpeed)
-				currentVelocity.Y = currentVelocity.Y + vAccel * (GetWorld()->GetDeltaSeconds()) - friction * (GetWorld()->GetDeltaSeconds());
-		} else {
-			if (currentVelocity.Y > -maxSpeed * 0.5f)
-				currentVelocity.Y = currentVelocity.Y + vAccel * (GetWorld()->GetDeltaSeconds()) + friction * (GetWorld()->GetDeltaSeconds());
+			if (FMath::IsNearlyEqual(linearVelocity.X, -max_spd, perc))		linearVelocity.X = -max_spd;
+			else if (linearVelocity.X < -max_spd)							linearVelocity.X += linear_deceleration * delta;
+			else if (linearVelocity.X > -max_spd)							linearVelocity.X -= linear_accel * delta;
 
 		}
-	} else //If the player is not pressing w or s, start deaccelerating
-	{
-		if (FMath::Abs(currentVelocity.Y) < 0.3f) //If we're near zero, just stop
-		{
-			currentVelocity.Y = 0.0f;
-			friction = 0.0f;
-		} else if (currentVelocity.Y > 0.0f) // Otherwise deaccelerate if you're moving forward...
-			currentVelocity.Y = currentVelocity.Y - acceleration * (GetWorld()->GetDeltaSeconds());
-		else //...or if you're moving backwards
-			currentVelocity.Y = currentVelocity.Y + acceleration * (GetWorld()->GetDeltaSeconds());
-	}
-
-	if (FMath::Abs(hAccel) > 0.0f && FMath::Abs(vAccel) > 0.0f && FMath::Abs(currentVelocity.Y) > 2.0f) //Only move right and left if you're moving forward
-	{
-		currentVelocity.X = currentVelocity.X + hAccel * (GetWorld()->GetDeltaSeconds());
 	} else {
-		if (FMath::Abs(currentVelocity.X) < 0.3f) //If less than zero, just reset.
-			currentVelocity.X = 0.0f;
-		else if (currentVelocity.X > 0.0f) //Choose how to deaccelerate
-			currentVelocity.X = currentVelocity.X - acceleration * (GetWorld()->GetDeltaSeconds());
-		else
-			currentVelocity.X = currentVelocity.X + acceleration * (GetWorld()->GetDeltaSeconds());
+		// this is for rolling without holding forward/backward
+
+		if (FMath::IsNearlyZero(linearVelocity.X, perc))		linearVelocity.X = 0.0f;
+		else if (linearVelocity.X > 0.0f)						linearVelocity.X -= linear_rollout * delta;
+		else if (linearVelocity.X < 0.0f)						linearVelocity.X += linear_rollout * delta;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Velocity.x =  %f"), currentVelocity.X);
-	UE_LOG(LogTemp, Warning, TEXT("Velocity.y =  %f"), currentVelocity.Y);
-	//Velocity.Y = currentVelocity.Y*UpdatedComponent->GetForwardVector().X; //Update component's velocity
-	//Velocity.X = currentVelocity.X*UpdatedComponent->GetRightVector().Y;
-	Velocity = UpdatedComponent->GetComponentRotation().RotateVector(currentVelocity); //Rotate velocity by the components rotation
-	MoveUpdatedComponent(Velocity, UpdatedComponent->GetComponentRotation(), false); //Move the RootComponent in the rotation of the RootComponent
-	UpdateComponentVelocity(); //Push the velocity update
+	// do traction
+	if (FMath::IsNearlyZero(linearVelocity.Y))		linearVelocity.Y = 0.0f;
+	else if (linearVelocity.Y < 0.0f)				linearVelocity.Y += traction * delta;
+	else if (linearVelocity.Y > 0.0f)				linearVelocity.Y -= traction * delta;
+
+	// do angular movement
+	if (input_moveAxis.X != 0) {
+		// constants
+		const float scalar = linearVelocity.X / max_forward_speed;
+		const float ang_speed = scalar * max_angular_speed;
+		const float ang_accel = scalar * angular_acceleration;
+		const float ang_decel = scalar * angular_deceleration;
+
+		if (input_moveAxis.X < 0) {
+
+			if (FMath::IsNearlyEqual(angularVelocity.Z, -ang_speed, perc))		angularVelocity.Z = -ang_speed;
+			else if (angularVelocity.Z < -ang_speed)							angularVelocity.Z += ang_decel * delta;
+			else if (angularVelocity.Z > -ang_speed)							angularVelocity.Z -= ang_accel * delta;
+		}
+		if (input_moveAxis.X > 0) {
+
+			if (FMath::IsNearlyEqual(angularVelocity.Z, ang_speed, perc))		angularVelocity.Z = ang_speed;
+			else if (angularVelocity.Z > ang_speed)								angularVelocity.Z -= ang_decel * delta;
+			else if (angularVelocity.Z < ang_speed)								angularVelocity.Z += ang_accel * delta;
+		}
+
+	} else {
+		// constants
+		// I might change this one
+		const float ang_decel = angular_deceleration;
+
+		if (FMath::IsNearlyZero(angularVelocity.Z))		angularVelocity.Z = 0.0f;
+		else if (angularVelocity.Z < 0.0f)				angularVelocity.Z += ang_decel * delta;
+		else if (angularVelocity.Z > 0.0f)				angularVelocity.Z -= ang_decel * delta;
+	}
+
+	// get the current rotation
+	FRotator rotation = UpdatedComponent->GetComponentRotation();
+
+	// rotate angular velocity to be in word space
+	///FVector UP = UpdatedComponent->GetUpVector();
+	///FVector worldAngVel = .RotateVector(angularVelocity);
+
+	// calculate new rotation
+	FRotator newRotation = rotation + FRotator::MakeFromEuler(angularVelocity);
+
+	// rotate the velocity accoring to rotation
+	Velocity = newRotation.RotateVector(linearVelocity);
+
+	// gravity is important
+	///Velocity.Z -= mass * 9.18f * delta;
+
+	// this moves the object
+	MoveUpdatedComponent(Velocity, newRotation, false);
+
+	// this needs to be called at the end of an update
+	UpdateComponentVelocity();
+
+	// get velocity
+	linearVelocity = newRotation.GetInverse().RotateVector(Velocity);
 }
-bool UCarMoveComponent::UpdateCarDynamics_Validate() { return true; }
 
-void UCarMoveComponent::Boost() { }
 
-void UCarMoveComponent::MoveHorizontal_Implementation(float hAxis_) {
-	UE_LOG(LogTemp, Warning, TEXT("Horizontal %f"), hAxis_);
-	hAccel = acceleration * hAxis_; //Get acceleration direction
-	UpdateCarDynamics();
+////////////////////////// Input //////////////////////////
+
+bool UCarMoveComponent::BoostPressed_Validate() { return true; }
+void UCarMoveComponent::BoostPressed_Implementation() {
+	input_boost = true;
+}
+
+bool UCarMoveComponent::BoostReleased_Validate() { return true; }
+void UCarMoveComponent::BoostReleased_Implementation() {
+	input_boost = false;
+}
+
+bool UCarMoveComponent::DriftReleased_Validate() { return false; }
+void UCarMoveComponent::DriftReleased_Implementation() {
+
+}
+
+bool UCarMoveComponent::DriftPressed_Validate() { return false; }
+void UCarMoveComponent::DriftPressed_Implementation() {
+
 }
 
 bool UCarMoveComponent::MoveHorizontal_Validate(float hAxis_) { return true; }
-
-
-void UCarMoveComponent::MoveVertical_Implementation(float vAxis_) {
-	UE_LOG(LogTemp, Warning, TEXT("Vertical %f"), vAxis_);
-	vAccel = acceleration * vAxis_; //Get acceleartion direction
-	UpdateCarDynamics();
+void UCarMoveComponent::MoveHorizontal_Implementation(float hAxis_) {
+	input_moveAxis.X = hAxis_;
 }
+
+
 bool UCarMoveComponent::MoveVertical_Validate(float vAxis_) { return true; }
+void UCarMoveComponent::MoveVertical_Implementation(float vAxis_) {
+	input_moveAxis.Y = vAxis_;
+}

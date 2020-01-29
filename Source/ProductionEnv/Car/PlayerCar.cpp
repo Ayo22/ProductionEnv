@@ -28,7 +28,10 @@ void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("Horizontal", carMoveComponent, &UCarMoveComponent::MoveHorizontal);
 	PlayerInputComponent->BindAxis("Vertical", carMoveComponent, &UCarMoveComponent::MoveVertical);
-	PlayerInputComponent->BindAction("Boost", IE_Pressed, carMoveComponent, &UCarMoveComponent::Boost);
+	PlayerInputComponent->BindAction("Boost", IE_Pressed, carMoveComponent, &UCarMoveComponent::BoostPressed);
+	PlayerInputComponent->BindAction("Boost", IE_Released, carMoveComponent, &UCarMoveComponent::BoostReleased);
+	PlayerInputComponent->BindAction("Drift", IE_Pressed, carMoveComponent, &UCarMoveComponent::DriftPressed);
+	PlayerInputComponent->BindAction("Drift", IE_Released, carMoveComponent, &UCarMoveComponent::DriftReleased);
 }
 
 void APlayerCar::SetPlayer(int playerNum_)
