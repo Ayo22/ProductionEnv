@@ -30,3 +30,18 @@ void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Vertical", carMoveComponent, &UCarMoveComponent::MoveVertical);
 	PlayerInputComponent->BindAction("Boost", IE_Pressed, carMoveComponent, &UCarMoveComponent::Boost);
 }
+
+void APlayerCar::SetPlayer(int playerNum_)
+{
+	// sets the player to be handled by this controller
+		UE_LOG(LogTemp, Warning, TEXT("IT DIDN'T CRASH"));
+	AutoPossessPlayer<EAutoReceiveInput::Player0> = true;
+}
+
+void APlayerCar::BeginPlay()
+{
+	Super::BeginPlay();
+	SetPlayer(0);
+
+	UE_LOG(LogTemp, Warning, TEXT("Begin play worked"));
+}

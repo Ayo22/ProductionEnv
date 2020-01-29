@@ -39,6 +39,11 @@ protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SetPlayer(int playerNum_);
+
+	virtual void BeginPlay() override;
+
+
 public:
 	APlayerCar();
 
