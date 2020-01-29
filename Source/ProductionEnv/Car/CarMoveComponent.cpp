@@ -6,10 +6,11 @@
 // Sets default values for this component's properties
 UCarMoveComponent::UCarMoveComponent()
 	: percision(1.0f)
-	, max_forward_speed(20.0f)
+	, max_forward_speed(50.0f)
 	, max_backward_speed(17.0f)
-	, linear_acceleration(80.0f)
-	, linear_deceleration(28.0f)
+	, linear_acceleration(70.0f)
+	, linear_deceleration(48.0f)
+	, linear_rollout(25.0f)
 	, boost_multiplier(3.0f)
 	, traction(50.0f)
 	, max_angular_speed(1.0f)
@@ -43,26 +44,28 @@ void UCarMoveComponent::BeginPlay() {
 // Called every frame
 void UCarMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 	// update the car physics
 	UpdateCarDynamics(DeltaTime);
 }
 
 bool UCarMoveComponent::UpdateCarDynamics_Validate(float delta) { return true; }
 void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
-	// get the current rotation
-	FRotator rotation = UpdatedComponent->GetComponentRotation();
+	// constant
+	const float perc = percision * delta;
 
 	// do linear movement
 	if (input_moveAxis.Y != 0) {
+		const float scalar = FMath::Abs(linearVelocity.X);
+
 		if (input_moveAxis.Y > 0) { // move forward
 			// constants
 			const float max_spd = max_forward_speed * (input_boost ? boost_multiplier : 1.0f);
 			const float linear_accel = linear_acceleration * (input_boost ? boost_multiplier : 1.0f);
 
-			if (FMath::Abs(linearVelocity.X - max_spd) < percision) linearVelocity.X = max_spd;
-			else if (linearVelocity.X > max_spd)					linearVelocity.X -= linear_deceleration * delta;
-			else if (linearVelocity.X < max_spd)					linearVelocity.X += linear_accel * delta;
+			if (FMath::IsNearlyEqual(linearVelocity.X, max_spd, perc))		linearVelocity.X = max_spd;
+			else if (linearVelocity.X > max_spd)							linearVelocity.X -= linear_deceleration * delta;
+			else if (linearVelocity.X < max_spd)							linearVelocity.X += linear_accel * delta;
 
 		}
 		if (input_moveAxis.Y < 0) { // move backward
@@ -70,36 +73,79 @@ void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
 			const float max_spd = max_backward_speed * (input_boost ? boost_multiplier : 1.0f);
 			const float linear_accel = linear_acceleration * (input_boost ? boost_multiplier : 1.0f);
 
-			if (FMath::Abs(linearVelocity.X + max_spd) < percision) linearVelocity.X = -max_spd;
-			else if (linearVelocity.X < -max_spd)					linearVelocity.X += linear_deceleration * delta;
-			else if (linearVelocity.X > -max_spd)					linearVelocity.X -= linear_accel * delta;
+			if (FMath::IsNearlyEqual(linearVelocity.X, -max_spd, perc))		linearVelocity.X = -max_spd;
+			else if (linearVelocity.X < -max_spd)							linearVelocity.X += linear_deceleration * delta;
+			else if (linearVelocity.X > -max_spd)							linearVelocity.X -= linear_accel * delta;
 
 		}
+	} else {
+		// this is for rolling without holding forward/backward
+
+		if (FMath::IsNearlyZero(linearVelocity.X, perc))		linearVelocity.X = 0.0f;
+		else if (linearVelocity.X > 0.0f)						linearVelocity.X -= linear_rollout * delta;
+		else if (linearVelocity.X < 0.0f)						linearVelocity.X += linear_rollout * delta;
 	}
 
 	// do traction
-	if (linearVelocity.Y == 0.0f) linearVelocity.Y = 0.0f;
-	else if (linearVelocity.Y < 0.0f) linearVelocity.Y += traction * delta;
-	else if (linearVelocity.Y > 0.0f) linearVelocity.Y -= traction * delta;
+	if (FMath::IsNearlyZero(linearVelocity.Y))		linearVelocity.Y = 0.0f;
+	else if (linearVelocity.Y < 0.0f)				linearVelocity.Y += traction * delta;
+	else if (linearVelocity.Y > 0.0f)				linearVelocity.Y -= traction * delta;
 
 	// do angular movement
+	if (input_moveAxis.X != 0) {
+		// constants
+		const float scalar = linearVelocity.X / max_forward_speed;
+		const float ang_speed = scalar * max_angular_speed;
+		const float ang_accel = scalar * angular_acceleration;
+		const float ang_decel = scalar * angular_deceleration;
 
+		if (input_moveAxis.X < 0) {
 
+			if (FMath::IsNearlyEqual(angularVelocity.Z, -ang_speed, perc))		angularVelocity.Z = -ang_speed;
+			else if (angularVelocity.Z < -ang_speed)							angularVelocity.Z += ang_decel * delta;
+			else if (angularVelocity.Z > -ang_speed)							angularVelocity.Z -= ang_accel * delta;
+		}
+		if (input_moveAxis.X > 0) {
+
+			if (FMath::IsNearlyEqual(angularVelocity.Z, ang_speed, perc))		angularVelocity.Z = ang_speed;
+			else if (angularVelocity.Z > ang_speed)								angularVelocity.Z -= ang_decel * delta;
+			else if (angularVelocity.Z < ang_speed)								angularVelocity.Z += ang_accel * delta;
+		}
+
+	} else {
+		// constants
+		// I might change this one
+		const float ang_decel = angular_deceleration;
+
+		if (FMath::IsNearlyZero(angularVelocity.Z))		angularVelocity.Z = 0.0f;
+		else if (angularVelocity.Z < 0.0f)				angularVelocity.Z += ang_decel * delta;
+		else if (angularVelocity.Z > 0.0f)				angularVelocity.Z -= ang_decel * delta;
+	}
+
+	// get the current rotation
+	FRotator rotation = UpdatedComponent->GetComponentRotation();
+
+	// rotate angular velocity to be in word space
+	///FVector UP = UpdatedComponent->GetUpVector();
+	///FVector worldAngVel = .RotateVector(angularVelocity);
+
+	// calculate new rotation
+	FRotator newRotation = rotation + FRotator::MakeFromEuler(angularVelocity);
 
 	// rotate the velocity accoring to rotation
-	Velocity = rotation.RotateVector(linearVelocity);
+	Velocity = newRotation.RotateVector(linearVelocity);
 
 	// gravity is important
-	Velocity.Z -= mass * 9.18f * delta;
+	///Velocity.Z -= mass * 9.18f * delta;
 
 	// this moves the object
-	MoveUpdatedComponent(Velocity, UpdatedComponent->GetComponentRotation(), false);
-
-	// get velocity
-	linearVelocity = rotation.GetInverse().RotateVector(Velocity);
+	MoveUpdatedComponent(Velocity, newRotation, false);
 
 	// this needs to be called at the end of an update
 	UpdateComponentVelocity();
+
+	// get velocity
+	linearVelocity = newRotation.GetInverse().RotateVector(Velocity);
 }
 
 

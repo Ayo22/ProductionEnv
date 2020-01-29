@@ -32,6 +32,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_backward_speed;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float linear_acceleration;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float linear_deceleration;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float linear_rollout;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float boost_multiplier;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float traction;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_angular_speed;
