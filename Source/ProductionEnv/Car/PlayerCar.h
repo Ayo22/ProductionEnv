@@ -42,6 +42,4 @@ protected:
 public:
 	APlayerCar();
 
-	virtual void BeginPlay() override;
-
 };
