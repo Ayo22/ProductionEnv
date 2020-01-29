@@ -21,6 +21,11 @@ APlayerCar::APlayerCar() : boomCamera(nullptr), followCamera(nullptr), carMoveCo
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	mesh->SetupAttachment(root);
+
+}
+
+void APlayerCar::BeginPlay() { 
+	
 }
 
 void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {
