@@ -43,13 +43,15 @@ void UCarMoveComponent::BeginPlay() {
 // Called every frame
 void UCarMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	// update the car physics
 	UpdateCarDynamics(DeltaTime);
 }
 
 bool UCarMoveComponent::UpdateCarDynamics_Validate(float delta) { return true; }
 void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
+	// get the current rotation
+	FRotator rotation = UpdatedComponent->GetComponentRotation();
 
 	// do linear movement
 	if (input_moveAxis.Y != 0) {
@@ -60,7 +62,7 @@ void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
 
 			if (FMath::Abs(linearVelocity.X - max_spd) < percision) linearVelocity.X = max_spd;
 			else if (linearVelocity.X > max_spd)					linearVelocity.X -= linear_deceleration * delta;
-			else if (linearVelocity.X < max_spd)					linearVelocity.X += linear_accel * delta;		
+			else if (linearVelocity.X < max_spd)					linearVelocity.X += linear_accel * delta;
 
 		}
 		if (input_moveAxis.Y < 0) { // move backward
@@ -75,24 +77,29 @@ void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
 		}
 	}
 
+	// do traction
+	if (linearVelocity.Y == 0.0f) linearVelocity.Y = 0.0f;
+	else if (linearVelocity.Y < 0.0f) linearVelocity.Y += traction * delta;
+	else if (linearVelocity.Y > 0.0f) linearVelocity.Y -= traction * delta;
+
+	// do angular movement
 
 
-	
 
 	// rotate the velocity accoring to rotation
-	Velocity = linearVelocity;
+	Velocity = rotation.RotateVector(linearVelocity);
 
 	// gravity is important
-	//Velocity.Z -= mass * 9.18f * delta;
-	
+	Velocity.Z -= mass * 9.18f * delta;
+
 	// this moves the object
 	MoveUpdatedComponent(Velocity, UpdatedComponent->GetComponentRotation(), false);
 
 	// get velocity
-	linearVelocity = Velocity;
+	linearVelocity = rotation.GetInverse().RotateVector(Velocity);
 
 	// this needs to be called at the end of an update
- 	UpdateComponentVelocity();
+	UpdateComponentVelocity();
 }
 
 
