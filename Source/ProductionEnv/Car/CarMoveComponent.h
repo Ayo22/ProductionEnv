@@ -25,45 +25,70 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		float speed;
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		float maxSpeed;
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		float acceleration;
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		float friction;
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		float frictionMax;
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		float torque;
 
+	// movement "constants" (their not actually constant but I dont change them)
+	float percision;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_forward_speed;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_backward_speed;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float linear_acceleration;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float linear_deceleration;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float boost_multiplier;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float traction;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_angular_speed;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float angular_acceleration;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float angular_deceleration;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float mass;
 
-	float hAccel;
-	float vAccel;
+	// movement variables
+	/// this velocity is relative to the forward direction and is rotated before applying to the car
+	FVector linearVelocity;
+	/// this velocity is relative to the forward direction and rotates the current rotation before applying
+	FVector angularVelocity;
 
-
+	// input variables
+	FVector2D input_moveAxis;
+	bool input_boost;
+	bool input_drift;
 
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(Reliable, Server, WithValidation)
-		virtual void UpdateCarDynamics(); //Bound to input
-	virtual void UpdateCarDynamics_Implementation();
-	virtual bool UpdateCarDynamics_Validate();
+		virtual void UpdateCarDynamics(float delta);
+	virtual void UpdateCarDynamics_Implementation(float delta);
+	virtual bool UpdateCarDynamics_Validate(float delta);
 
-	UFUNCTION()
-		virtual void Boost(); //Bound to input
+	// input 
 
 	UFUNCTION(Reliable, Server, WithValidation)
-		virtual void MoveHorizontal(float hAxisDir_);
+		virtual void BoostPressed(); //Bound to input
+	virtual void BoostPressed_Implementation();
+	virtual bool BoostPressed_Validate();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+		virtual void BoostReleased(); //Bound to input
+	virtual void BoostReleased_Implementation();
+	virtual bool BoostReleased_Validate();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+		virtual void DriftPressed(); //Bound to input
+	virtual void DriftPressed_Implementation();
+	virtual bool DriftPressed_Validate();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+		virtual void DriftReleased(); //Bound to input
+	virtual void DriftReleased_Implementation();
+	virtual bool DriftReleased_Validate();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+		virtual void MoveHorizontal(float hAxisDir_); //Bound to input
 	virtual void MoveHorizontal_Implementation(float hAxisDir_);
 	virtual bool MoveHorizontal_Validate(float hAxisDir_);
+
 	UFUNCTION(Reliable, Server, WithValidation)
-		virtual void MoveVertical(float vAxisDir_);
+		virtual void MoveVertical(float vAxisDir_); //Bound to input
 	virtual void MoveVertical_Implementation(float vAxisDir_);
 	virtual bool MoveVertical_Validate(float vAxisDir_);
-	UPROPERTY(EditAnywhere, Category = CarPhysics)
-		FVector currentVelocity;
+
 };
