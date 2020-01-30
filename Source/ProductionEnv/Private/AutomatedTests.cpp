@@ -23,7 +23,7 @@ UWorld* GetTestWorld() {
 	return nullptr;
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FAutomatedTests, "PETests.LaunchLevels", EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FAutomatedTests, "PETests.LaunchLevels", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
 void FAutomatedTests::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
 {
 	// 1. Get the array of assets from Maps directory.
