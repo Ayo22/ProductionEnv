@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "CarMoveComponent.h"
 #include "Components/InputComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "PlayerCar.generated.h"
 
 /**
@@ -39,12 +40,19 @@ protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetPlayer(int playerNum_);
+	
 
 	virtual void BeginPlay() override;
 
-
+	UPROPERTY(VisibleAnywhere, Category = Type)
+	TEnumAsByte<EAutoReceiveInput::Type> type;
 public:
+
 	APlayerCar();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+	void SetPlayer(EAutoReceiveInput::Type t);
+	virtual void SetPlayer_Implementation(EAutoReceiveInput::Type t);
+	virtual bool SetPlayer_Validate(EAutoReceiveInput::Type t);
 
 };

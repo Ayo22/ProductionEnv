@@ -21,6 +21,7 @@ APlayerCar::APlayerCar() : boomCamera(nullptr), followCamera(nullptr), carMoveCo
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	mesh->SetupAttachment(root);
+	
 }
 
 void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {
@@ -34,17 +35,29 @@ void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Drift", IE_Released, carMoveComponent, &UCarMoveComponent::DriftReleased);
 }
 
-void APlayerCar::SetPlayer(int playerNum_)
-{
-	// sets the player to be handled by this controller
-		UE_LOG(LogTemp, Warning, TEXT("IT DIDN'T CRASH"));
-	AutoPossessPlayer<EAutoReceiveInput::Player0> = true;
-}
 
 void APlayerCar::BeginPlay()
 {
 	Super::BeginPlay();
-	SetPlayer(0);
+	
+}
 
-	UE_LOG(LogTemp, Warning, TEXT("Begin play worked"));
+void APlayerCar::SetPlayer_Implementation(EAutoReceiveInput::Type t)
+{
+	if (Controller == NULL)
+{
+		type = t;
+		APlayerCar::AutoPossessPlayer = type;
+		UE_LOG(LogTemp, Warning, TEXT("Assigned player to possess"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Assigned"));
+	}
+
+}
+
+bool APlayerCar::SetPlayer_Validate(EAutoReceiveInput::Type t)
+{
+	return true;
 }
