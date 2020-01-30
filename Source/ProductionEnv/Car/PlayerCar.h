@@ -10,6 +10,7 @@
 #include "CarMoveComponent.h"
 #include "Components/InputComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "PlayerCar.generated.h"
 
 /**
@@ -47,6 +48,13 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
+	
+
+	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, Category = Type)
+	TEnumAsByte<EAutoReceiveInput::Type> type;
 public:
+
 	APlayerCar();
 };
