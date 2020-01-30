@@ -4,8 +4,7 @@
 #include "DeathMatchGameMode.h"
 
 
-ADeathMatchGameMode::ADeathMatchGameMode() : playerBP(nullptr), pointsPerKill(50), killsToWin(20), dmPlayer1Kills(0), dmPlayer2Kills(0), dmPlayer3Kills(0), dmPlayer4Kills(0)
-{
+ADeathMatchGameMode::ADeathMatchGameMode() : playerBP(nullptr), pointsPerKill(50), killsToWin(20), kills(0) {
 	spawnPoints.Init(nullptr, 4);
 	players.Init(nullptr, 4);
 }
@@ -16,28 +15,13 @@ void ADeathMatchGameMode::StartGame()
 }
 
 // everytime a kill is made the car should call the end game function to check if the game has ended
-void ADeathMatchGameMode::EndGame(int playerKills_, int player_)
+void ADeathMatchGameMode::EndGame()
 {
 	// kills is just a temporary variable. Will turn into Player->Kills when it's added
-	if (playerKills_ >= killsToWin)
+	if (kills >= killsToWin)
 	{
 		// this will be replaced by showing UI in the future but this will just show a debug message
 		UE_LOG(LogTemp, Warning, TEXT("EndGame"));
-		switch (player_)
-		{
-		case 1:
-			UE_LOG(LogTemp, Warning, TEXT("Player 1 was won the game!"));
-			break;
-		case 2:
-			UE_LOG(LogTemp, Warning, TEXT("Player 2 was won the game!"));
-			break;
-		case 3:
-			UE_LOG(LogTemp, Warning, TEXT("Player 3 was won the game!"));
-			break;
-		case 4:
-			UE_LOG(LogTemp, Warning, TEXT("Player 4 was won the game!"));
-			break;
-		}
 	}
 	else
 	{
@@ -58,33 +42,11 @@ void ADeathMatchGameMode::Tick(float deltaTime)
 
 }
 
-void ADeathMatchGameMode::AddKills(int dmKills_, int dmPlayer_)
+void ADeathMatchGameMode::AddKills()
 {
 	// just for the purpose of testing it'll add 1 and then call end game
-	switch (dmPlayer_)
-	{
-	case 1:
-		dmPlayer1Kills += dmKills_;
-		UE_LOG(LogTemp, Warning, TEXT("Player 1 received kills"));
-		EndGame(dmKills_, dmPlayer_);
-		break;
-	case 2:
-		dmPlayer2Kills += dmKills_;
-		UE_LOG(LogTemp, Warning, TEXT("Player 2 received kills"));
-		EndGame(dmKills_, dmPlayer_);
-		break;
-	case 3:
-		dmPlayer3Kills += dmKills_;
-		UE_LOG(LogTemp, Warning, TEXT("Player 3 received kills"));
-		EndGame(dmKills_, dmPlayer_);
-		break;
-	case 4:
-		dmPlayer4Kills += dmKills_;
-		UE_LOG(LogTemp, Warning, TEXT("Player 4 received kills"));
-		EndGame(dmKills_, dmPlayer_);
-		break;
-	}
-
+	kills += 1;
+	EndGame();
 }
 
 void ADeathMatchGameMode::SetSpawnPoint(ASpawner* spawnPoints_, int index) {
@@ -110,12 +72,9 @@ void ADeathMatchGameMode::SpawnPlayers()
 {
 	UWorld* wrld = GetWorld();
 	FActorSpawnParameters param;
-
 	//loop through each spawn point and spawn a car there 
 	for (int i = 0; i < 4; ++i) {
 		wrld->SpawnActor(playerBP, &spawnPoints[i]->location, &spawnPoints[i]->rotator, param);
-		players[i] = playerBP.GetDefaultObject();
-		players[i]->SetPlayer((EAutoReceiveInput::Type)(i + 1));
 	}
 }
 
