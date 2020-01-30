@@ -29,7 +29,7 @@ void FAutomatedTests::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FStr
 	// 1. Get the array of assets from Maps directory.
 	FAssetRegistryModule& ARM = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> AssetDataArray;
-	ARM.Get().GetAssetsByPath(TEXT("/Game/StarterContent/Maps"), AssetDataArray);
+	ARM.Get().GetAssetsByPath(TEXT("/Game/Test/Maps"), AssetDataArray);
 
 	for (const auto& AssetData : AssetDataArray)
 	{
