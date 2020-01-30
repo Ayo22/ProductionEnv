@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DeathMatchGameMode.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "Spawner.generated.h"
 
@@ -20,6 +22,7 @@ public:
 		FRotator rotator;
 	UPROPERTY(EditAnywhere, BluePrintReadOnly)
 		int index;
+
 
 protected:
 	// Called when the game starts or when spawned

@@ -29,6 +29,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 	void AddKills(int kills_, int player_);
+	UFUNCTION(BlueprintCallable)
+		void SetSpawnPoint(ASpawner* spawnPoint_, int index);
 
 
 protected:
@@ -43,8 +45,7 @@ private:
 	int dmPlayer2Kills;
 	int dmPlayer3Kills;
 	int dmPlayer4Kills;
-	UFUNCTION(BlueprintCallable)
-		void SetSpawnPoint(ASpawner* spawnPoint_, int index);
+
 	void SpawnPlayers();
 	//UFUNCTION(BlueprintCallable)
 		//void SetPlayers(APlayerCar* player_, int index);
