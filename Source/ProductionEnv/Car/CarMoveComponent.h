@@ -38,7 +38,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float boost_multiplier;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float traction;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_angular_speed;
-	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_angular_drift_speed;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float angular_acceleration;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float angular_deceleration;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float mass;

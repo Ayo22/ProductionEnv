@@ -14,9 +14,8 @@ UCarMoveComponent::UCarMoveComponent()
 	, boost_multiplier(3.0f)
 	, traction(50.0f)
 	, max_angular_speed(1.0f)
-	, max_angular_drift_speed(2.0f)
-	, angular_acceleration(10.0f)
-	, angular_deceleration(20.0f)
+	, angular_acceleration(1.0f)
+	, angular_deceleration(1.0f)
 	, mass(2)
 	, linearVelocity(FVector::ZeroVector)
 	, angularVelocity(FVector::ZeroVector)
@@ -87,67 +86,46 @@ void UCarMoveComponent::UpdateCarDynamics_Implementation(float delta) {
 		else if (linearVelocity.X < 0.0f)						linearVelocity.X += linear_rollout * delta;
 	}
 
-
 	// do traction
-	if (FMath::IsNearlyZero(linearVelocity.Y, perc))		linearVelocity.Y = 0.0f;
+	if (FMath::IsNearlyZero(linearVelocity.Y))		linearVelocity.Y = 0.0f;
 	else if (linearVelocity.Y < 0.0f)				linearVelocity.Y += traction * delta;
 	else if (linearVelocity.Y > 0.0f)				linearVelocity.Y -= traction * delta;
 
-
 	// do angular movement
-	if (input_moveAxis.X != 0 && linearVelocity.X > 0.0f) {
+	if (input_moveAxis.X != 0) {
 		// constants
-		const float scalar = FMath::Abs(linearVelocity.X / max_forward_speed);
+		const float scalar = linearVelocity.X / max_forward_speed;
 		const float ang_speed = scalar * max_angular_speed;
 		const float ang_accel = scalar * angular_acceleration;
+		const float ang_decel = scalar * angular_deceleration;
 
 		if (input_moveAxis.X < 0) {
 
-			if (FMath::IsNearlyEqual(angularVelocity.Z, -ang_speed, perc * 10.0f))		angularVelocity.Z = -ang_speed;
-			else if (angularVelocity.Z < -ang_speed)							angularVelocity.Z += ang_accel * delta;
+			if (FMath::IsNearlyEqual(angularVelocity.Z, -ang_speed, perc))		angularVelocity.Z = -ang_speed;
+			else if (angularVelocity.Z < -ang_speed)							angularVelocity.Z += ang_decel * delta;
 			else if (angularVelocity.Z > -ang_speed)							angularVelocity.Z -= ang_accel * delta;
 		}
 		if (input_moveAxis.X > 0) {
 
-			if (FMath::IsNearlyEqual(angularVelocity.Z, ang_speed, perc * 10.0f))		angularVelocity.Z = ang_speed;
-			else if (angularVelocity.Z > ang_speed)								angularVelocity.Z -= ang_accel * delta;
+			if (FMath::IsNearlyEqual(angularVelocity.Z, ang_speed, perc))		angularVelocity.Z = ang_speed;
+			else if (angularVelocity.Z > ang_speed)								angularVelocity.Z -= ang_decel * delta;
 			else if (angularVelocity.Z < ang_speed)								angularVelocity.Z += ang_accel * delta;
-		}
-
-	} else if (input_moveAxis.X != 0 && linearVelocity.X < 0.0f) {
-		// constants
-		const float scalar = FMath::Abs(linearVelocity.X / max_forward_speed);
-		const float ang_speed = scalar * max_angular_speed;
-		const float ang_accel = scalar * angular_acceleration;
-
-		if (input_moveAxis.X < 0) {
-
-			if (FMath::IsNearlyEqual(angularVelocity.Z, ang_speed, perc * 10.0f))		angularVelocity.Z = ang_speed;
-			else if (angularVelocity.Z > ang_speed)								angularVelocity.Z -= ang_accel * delta;
-			else if (angularVelocity.Z < ang_speed)								angularVelocity.Z += ang_accel * delta;
-		}
-		if (input_moveAxis.X > 0) {
-
-			if (FMath::IsNearlyEqual(angularVelocity.Z, -ang_speed, perc * 10.0f))		angularVelocity.Z = -ang_speed;
-			else if (angularVelocity.Z < -ang_speed)							angularVelocity.Z += ang_accel * delta;
-			else if (angularVelocity.Z > -ang_speed)							angularVelocity.Z -= ang_accel * delta;
 		}
 
 	} else {
+		// constants
+		// I might change this one
+		const float ang_decel = angular_deceleration;
 
-		//UE_LOG(LogTemp, Warning, TEXT("angular velocity = %f, perc = %f"), angularVelocity.Z, perc);
-
-		if (FMath::IsNearlyZero(angularVelocity.Z, perc * 10.0f))		angularVelocity.Z = 0.0f;
-		else if (angularVelocity.Z < 0.0f)						angularVelocity.Z += angular_deceleration * delta;
-		else if (angularVelocity.Z > 0.0f)						angularVelocity.Z -= angular_deceleration * delta;
+		if (FMath::IsNearlyZero(angularVelocity.Z))		angularVelocity.Z = 0.0f;
+		else if (angularVelocity.Z < 0.0f)				angularVelocity.Z += ang_decel * delta;
+		else if (angularVelocity.Z > 0.0f)				angularVelocity.Z -= ang_decel * delta;
 	}
-
 
 	// get the current rotation
 	FRotator rotation = UpdatedComponent->GetComponentRotation();
 
 	// rotate angular velocity to be in word space
-	// this doesnt work yet
 	///FVector UP = UpdatedComponent->GetUpVector();
 	///FVector worldAngVel = .RotateVector(angularVelocity);
 
