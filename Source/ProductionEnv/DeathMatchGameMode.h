@@ -20,15 +20,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SpawnPoints)
 		TArray<ASpawner*> spawnPoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayersToSpawn)
-		TSubclassOf<class APlayerCar> playerBP;
+		TSubclassOf<APlayerCar> playerBP;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = PlayableCharacters)
 		TArray<APlayerCar*> players;
 
 	ADeathMatchGameMode();
-	void EndGame();
+	void EndGame(int playerKills_, int player_);
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
-	void AddKills();
+	void AddKills(int kills_, int player_);
 
 
 protected:
@@ -39,7 +39,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		int pointsPerKill;
 	int killsToWin;
-	int kills;
+	int dmPlayer1Kills;
+	int dmPlayer2Kills;
+	int dmPlayer3Kills;
+	int dmPlayer4Kills;
 	UFUNCTION(BlueprintCallable)
 		void SetSpawnPoint(ASpawner* spawnPoint_, int index);
 	void SpawnPlayers();
