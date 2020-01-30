@@ -41,3 +41,23 @@ void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Drift", IE_Pressed, carMoveComponent, &UCarMoveComponent::DriftPressed);
 	PlayerInputComponent->BindAction("Drift", IE_Released, carMoveComponent, &UCarMoveComponent::DriftReleased);
 }
+
+void APlayerCar::SetPlayer_Implementation(EAutoReceiveInput::Type t)
+{
+	if (Controller == NULL)
+{
+		type = t;
+		APlayerCar::AutoPossessPlayer = type;
+		UE_LOG(LogTemp, Warning, TEXT("Assigned player to possess"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Assigned"));
+	}
+
+}
+
+bool APlayerCar::SetPlayer_Validate(EAutoReceiveInput::Type t)
+{
+	return true;
+}
