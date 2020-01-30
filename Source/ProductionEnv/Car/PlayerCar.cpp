@@ -18,9 +18,17 @@ APlayerCar::APlayerCar() : boomCamera(nullptr), followCamera(nullptr), carMoveCo
 
 	carMoveComponent = CreateDefaultSubobject<UCarMoveComponent>(TEXT("Car Movement Component"));
 	carMoveComponent->SetUpdatedComponent(root);
+	carMoveComponent->animInstancePtr = wheelAnimator;
 
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	mesh->SetupAttachment(root);
+	
+}
+
+void APlayerCar::BeginPlay() {
+	Super::BeginPlay();
+	UE_LOG(LogTemp, Warning, TEXT("HI"));
+	wheelAnimator = Cast<UAnimInstance>(mesh->GetAnimInstance());
 }
 
 void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {

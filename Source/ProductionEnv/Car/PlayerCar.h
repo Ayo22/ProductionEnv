@@ -6,9 +6,10 @@
 #include "Car/BaseCar.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "CarMoveComponent.h"
 #include "Components/InputComponent.h"
+#include "Animation/AnimInstance.h"
 #include "PlayerCar.generated.h"
 
 /**
@@ -35,11 +36,17 @@ protected:
 
 
 	UPROPERTY(EditAnywhere, Category = Mesh)
-		UStaticMeshComponent* mesh;
+		USkeletalMeshComponent* mesh;
+
+	UPROPERTY(EditAnywhere, Category = AnimationInstance)
+		UAnimInstance* wheelAnimator;
+
+	UPROPERTY(EditAnywhere, Category = Rotator)
+		FRotator wheelRotation;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
 
 public:
 	APlayerCar();
-
 };

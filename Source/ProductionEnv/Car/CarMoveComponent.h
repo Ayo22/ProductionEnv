@@ -7,6 +7,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Engine/World.h"
 #include "Components/ArrowComponent.h"
+#include "Animation/AnimInstance.h"
 #include "CarMoveComponent.generated.h"
 
 /**
@@ -20,7 +21,8 @@ class PRODUCTIONENV_API UCarMoveComponent : public UPawnMovementComponent
 public:
 	// Sets default values for this component's properties
 	UCarMoveComponent();
-
+public:
+	UAnimInstance* animInstancePtr;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
