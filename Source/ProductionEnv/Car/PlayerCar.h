@@ -14,10 +14,10 @@
 #include "PlayerCar.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class PRODUCTIONENV_API APlayerCar : public ABaseCar
+class PRODUCTIONENV_API APlayerCar : public ABaseCar 
 {
 	GENERATED_BODY()
 
@@ -48,13 +48,15 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
-	
-
-	virtual void BeginPlay() override;
-
 	UPROPERTY(VisibleAnywhere, Category = Type)
-	TEnumAsByte<EAutoReceiveInput::Type> type;
+		TEnumAsByte<EAutoReceiveInput::Type> type;
 public:
 
 	APlayerCar();
+
+	UFUNCTION(Reliable, Server, WithValidation)
+		void SetPlayer(EAutoReceiveInput::Type t);
+	void SetPlayer_Implementation(EAutoReceiveInput::Type t);
+	bool SetPlayer_Validate(EAutoReceiveInput::Type t);
+
 };

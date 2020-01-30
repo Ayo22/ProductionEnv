@@ -28,7 +28,7 @@ APlayerCar::APlayerCar() : boomCamera(nullptr), followCamera(nullptr), carMoveCo
 void APlayerCar::BeginPlay() {
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Warning, TEXT("HI"));
-	wheelAnimator = Cast<UAnimInstance>(mesh->GetAnimInstance());
+	//wheelAnimator = Cast<UAnimInstance>(mesh->GetAnimInstance());
 }
 
 void APlayerCar::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {
