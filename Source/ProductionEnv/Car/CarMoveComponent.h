@@ -7,6 +7,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Engine/World.h"
 #include "Components/ArrowComponent.h"
+#include "Animation/AnimInstance.h"
 #include "CarMoveComponent.generated.h"
 
 /**
@@ -20,7 +21,8 @@ class PRODUCTIONENV_API UCarMoveComponent : public UPawnMovementComponent
 public:
 	// Sets default values for this component's properties
 	UCarMoveComponent();
-
+public:
+	UAnimInstance* animInstancePtr;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -36,6 +38,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float boost_multiplier;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float traction;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_angular_speed;
+	UPROPERTY(EditAnywhere, Category = CarPhysics) float max_angular_drift_speed;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float angular_acceleration;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float angular_deceleration;
 	UPROPERTY(EditAnywhere, Category = CarPhysics) float mass;

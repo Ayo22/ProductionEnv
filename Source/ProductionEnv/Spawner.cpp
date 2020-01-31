@@ -17,6 +17,15 @@ void ASpawner::BeginPlay()
 	Super::BeginPlay();
 	location = GetActorLocation();
 	rotator = GetActorRotation();
+	ADeathMatchGameMode* dm = Cast<ADeathMatchGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (dm) {
+		dm->SetSpawnPoint(this, index);
+	}
+
+	else {
+		UE_LOG(LogTemp, Error, TEXT("DM Game mode returned nullprt"));
+	}
 }
 
 // Called every frame

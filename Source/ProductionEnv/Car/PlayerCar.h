@@ -6,16 +6,18 @@
 #include "Car/BaseCar.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "CarMoveComponent.h"
 #include "Components/InputComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "PlayerCar.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class PRODUCTIONENV_API APlayerCar : public ABaseCar
+class PRODUCTIONENV_API APlayerCar : public ABaseCar 
 {
 	GENERATED_BODY()
 
@@ -35,13 +37,26 @@ protected:
 
 
 	UPROPERTY(EditAnywhere, Category = Mesh)
-		UStaticMeshComponent* mesh;
+		USkeletalMeshComponent* mesh;
+
+	UPROPERTY(EditAnywhere, Category = AnimationInstance)
+		UAnimInstance* wheelAnimator;
+
+	UPROPERTY(EditAnywhere, Category = Rotator)
+		FRotator wheelRotation;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, Category = Type)
+		TEnumAsByte<EAutoReceiveInput::Type> type;
 public:
+
 	APlayerCar();
 
-	virtual void BeginPlay() override;
+	UFUNCTION(Reliable, Server, WithValidation)
+		void SetPlayer(EAutoReceiveInput::Type t);
+	void SetPlayer_Implementation(EAutoReceiveInput::Type t);
+	bool SetPlayer_Validate(EAutoReceiveInput::Type t);
 
 };
