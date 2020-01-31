@@ -24,7 +24,7 @@
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
-class CARBATTLETEST_API UCarCollisionComponent : public UActorComponent
+class PRODUCTIONENV_API UCarCollisionComponent : public UActorComponent
 
 {
 

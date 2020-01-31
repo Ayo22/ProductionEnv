@@ -10,7 +10,7 @@
 #include "Projectile.generated.h"
 
 UCLASS()
-class AGILE3TEST_API AProjectile : public AActor
+class PRODUCTIONENV_API AProjectile : public AActor
 {
 	GENERATED_BODY()
 
