@@ -12,7 +12,7 @@ class FTestModuleImpl : public FDefaultGameModuleImpl {
 
 	void ShutdownModule() override {
 		/* Workaround for UE-25350 */
-		FAutomationTestFramework::Get().UnregisterAutomationTest("FAutomatedTests");
+		FAutomationTestFramework::Get().UnregisterAutomationTest("FAutomationTests");
 		//... for every test you defined.
 	}
 };

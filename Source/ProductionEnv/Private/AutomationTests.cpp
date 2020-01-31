@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "../Public/AutomatedTests.h"
+
+#include "AutomationTests.h"
 
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
@@ -8,8 +9,6 @@
 #include "Engine/Engine.h"
 #include "AssetRegistryModule.h"
 #include "Engine/LevelScriptBlueprint.h"
-
-#include "../ProductionEnvGameModeBase.h"
 
 UWorld* GetTestWorld() {
 	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
@@ -23,13 +22,14 @@ UWorld* GetTestWorld() {
 	return nullptr;
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FAutomatedTests, "PETests.LaunchLevels", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
-void FAutomatedTests::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FAutomationTests, "PETest.LaunchLevels", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext | EAutomationTestFlags::ProductFilter)
+
+void FAutomationTests::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
 {
 	// 1. Get the array of assets from Maps directory.
 	FAssetRegistryModule& ARM = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> AssetDataArray;
-	ARM.Get().GetAssetsByPath(TEXT("/Game/Test/Maps"), AssetDataArray);
+	ARM.Get().GetAssetsByPath(TEXT("/Game/Tests/Maps"), AssetDataArray);
 
 	for (const auto& AssetData : AssetDataArray)
 	{
@@ -43,7 +43,7 @@ void FAutomatedTests::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FStr
 	}
 }
 
-bool FAutomatedTests::RunTest(const FString& Parameters)
+bool FAutomationTests::RunTest(const FString& Parameters)
 {
 
 	TestTrue("World created", AutomationOpenMap(Parameters));
