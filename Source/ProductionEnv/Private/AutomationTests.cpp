@@ -47,21 +47,15 @@ bool FAutomationTests::RunTest(const FString& Parameters)
 {
 
 	TestTrue("World created", AutomationOpenMap(Parameters));
-	//UWorld* world = GetTestWorld();
+	UWorld* world = GetTestWorld();
 
-	//TArray<ULevel*> levels = world->GetLevels();
-	//for (auto lvl : levels)
-	//{
-		//GEngine->AddOnScreenDebugMessage(0, 15, FColor::Yellow, lvl->GetFName().ToString());
-	//}
+	TArray<ULevel*> levels = world->GetLevels();
 
-	//TestTrue("Levels created", true);
-
-	// ULevelScriptBlueprint* lvlBlueprint = levels[0]->LevelScriptBlueprint;
-	// lvlBlueprint -> this is a reference to the level blueprint
-
-	// TestTrue("Game mode set correctly", world->GetAuthGameMode()->IsA<AProductionEnvGameModeBase>());
-	// TestTrue("World can initialize test actor", world->AreActorsInitialized());
+	for (auto level : levels)
+	{
+		ULevelScriptBlueprint* lvlBlueprint = level->GetLevelScriptBlueprint(); // replace with inherited level script actor
+		//lvlBlueprint->
+	}
 
 	/*for (TActorIterator<"MyClassHere"> It(world, "MyClassHere"::StaticClass()); It; ++It) {
 		TestTrue("Classes do something", It->DoSomething());

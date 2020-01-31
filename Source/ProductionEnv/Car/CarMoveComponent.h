@@ -85,12 +85,12 @@ public:
 	virtual void DriftReleased_Implementation();
 	virtual bool DriftReleased_Validate();
 
-	UFUNCTION(Reliable, Server, WithValidation)
+	UFUNCTION(BlueprintCallable, Reliable, Server, WithValidation)
 		virtual void MoveHorizontal(float hAxisDir_); //Bound to input
 	virtual void MoveHorizontal_Implementation(float hAxisDir_);
 	virtual bool MoveHorizontal_Validate(float hAxisDir_);
 
-	UFUNCTION(Reliable, Server, WithValidation)
+	UFUNCTION(BlueprintCallable, Reliable, Server, WithValidation)
 		virtual void MoveVertical(float vAxisDir_); //Bound to input
 	virtual void MoveVertical_Implementation(float vAxisDir_);
 	virtual bool MoveVertical_Validate(float vAxisDir_);

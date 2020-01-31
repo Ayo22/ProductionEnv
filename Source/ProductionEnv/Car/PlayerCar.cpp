@@ -27,7 +27,7 @@ APlayerCar::APlayerCar() : boomCamera(nullptr), followCamera(nullptr), carMoveCo
 
 void APlayerCar::BeginPlay() {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("HI"));
+	//UE_LOG(LogTemp, Warning, TEXT("HI"));
 	//wheelAnimator = Cast<UAnimInstance>(mesh->GetAnimInstance());
 }
 
@@ -48,11 +48,11 @@ void APlayerCar::SetPlayer_Implementation(EAutoReceiveInput::Type t)
 {
 		type = t;
 		APlayerCar::AutoPossessPlayer = type;
-		UE_LOG(LogTemp, Warning, TEXT("Assigned player to possess"));
+		//UE_LOG(LogTemp, Warning, TEXT("Assigned player to possess"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Assigned"));
+		//UE_LOG(LogTemp, Warning, TEXT("Not Assigned"));
 	}
 
 }
